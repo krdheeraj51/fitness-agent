@@ -1,13 +1,29 @@
-<div class="chat-container">
-    <div class="messages">
-        <div *ngFor="let m of messages" class="message" [class.user]="m.role === 'user'"
-            [class.assistant]="m.role === 'assistant'">
-            <div class="bubble">{{ m.text }}</div>
+<div class="chatbot-container">
+    <h1>🏋️ Fitness Agent</h1>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+    </div>
+
+    <!-- Chat Box -->
+    <div class="chat-box">
+        <div *ngFor="let message of messages" class="message" [ngClass]="{
+        'user-message': message.sender === 'user',
+        'agent-message': message.sender === 'agent',
+        'loading': message.loading
+      }">
+            {{ message.text }}
         </div>
     </div>
 
-    <div class="composer">
-        <textarea [(ngModel)]="input" placeholder="Enter your prompt..." rows="2"></textarea>
-        <button (click)="send()" [disabled]="loading">{{ loading ? 'Sending...' : 'Send' }}</button>
+    <!-- Input Area -->
+    <div class="input-container">
+        <textarea [(ngModel)]="prompt" placeholder="Ask your fitness question..." (keypress)="handleKeyPress($event)"
+            [disabled]="isLoading">
+    </textarea>
+        <button (click)="sendPrompt()" [disabled]="isLoading">
+            {{ isLoading ? 'Sending...' : 'Send' }}
+        </button>
     </div>
 </div>

@@ -5,3 +5,4 @@ python-dotenv==1.0.1
 langchain-core
 # langchain_community
 langchain-tavily==0.2.17
+fastapi[standard]
