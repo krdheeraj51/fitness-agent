@@ -2,8 +2,6 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
 from pathlib import Path
-# from langchain_classic.agents import create_tool_calling_agent, AgentExecutor
-# from langchain_classic.agents import create_tool_calling_agent, AgentExecutor   
 
 from tools import  web_fitness_search
 from prompts import fitness_prompt
@@ -23,10 +21,11 @@ llm = ChatOpenAI(
 prompt = "You are a professional fitness coach AI.\n" \
          "You can access the internet for real-time or factual information.\n" \
 
+system_content = fitness_prompt.messages[0].prompt.template
 # agent = create_agent(llm,prompt)
 # agent = create_agent(llm, tools=[web_fitness_search], prompt=fitness_prompt)
 
-agent = create_agent(llm, tools=[web_fitness_search])
+agent = create_agent(llm, tools=[web_fitness_search],system_prompt=system_content)
 print("🤖 Fitness Agent is ready! Ask your questions about fitness, nutrition, or health. Type 'exit' to quit." )
 print("💡 Example: 'What are the latest trends in fitness for 2024?'")
 print("💡 Example: 'What are the best exercises for building muscle?'")
