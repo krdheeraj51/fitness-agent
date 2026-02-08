@@ -1,4 +1,7 @@
-langchain
-langchain-community
-openai
-python-dotenv
+langchain==1.2.9
+langchain-openai
+tavily-python==0.4.0
+python-dotenv==1.0.1
+langchain-core
+# langchain_community
+langchain-tavily==0.2.17
