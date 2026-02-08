@@ -8,7 +8,7 @@ export interface PromptRequest {
 }
 
 export interface AgentResponse {
-  result: string;
+  response: string;
   status: string;
 }
 @Injectable({

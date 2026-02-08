@@ -50,7 +50,7 @@ export class ChatBot {
         this.messages = this.messages.filter(m => !m.loading);
 
         if (response.status === 'success') {
-          this.messages.push({ text: response.result, sender: 'agent' });
+          this.messages.push({ text: response.response, sender: 'agent' });
         } else {
           this.errorMessage = 'Error: ' + response.status;
         }
