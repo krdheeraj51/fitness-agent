@@ -72,7 +72,7 @@ fitness-agent/
 
 5. Run the FastAPI server:
    ```bash
-   uvicorn main:app --reload
+   fastapi dev main.py
    ```
    
    The backend will be available at `http://localhost:8000`
