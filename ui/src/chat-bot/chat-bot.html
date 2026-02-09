@@ -8,21 +8,22 @@
 
     <!-- Chat Box -->
     <div class="chat-box">
-        <div *ngFor="let message of messages" class="message" [ngClass]="{
-        'user-message': message.sender === 'user',
-        'agent-message': message.sender === 'agent',
-        'loading': message.loading
-      }">
-            {{ message.text }}
+        <div *ngIf="messages.length === 0" class="no-messages">
+            Ask me a fitness question!
+        </div>
+
+        <div *ngFor="let message of messages" class="message" [class.user-message]="message.sender === 'user'"
+            [class.agent-message]="message.sender === 'agent'" [class.loading]="message.loading">
+            <div class="message-content" [innerHTML]="formatMessage(message.text)"></div>
         </div>
     </div>
 
     <!-- Input Area -->
     <div class="input-container">
-        <textarea [(ngModel)]="prompt" placeholder="Ask your fitness question..." (keypress)="handleKeyPress($event)"
+        <textarea [(ngModel)]="prompt" placeholder="Ask your fitness question..." (keydown)="handleKeyPress($event)"
             [disabled]="isLoading">
     </textarea>
-        <button (click)="sendPrompt()" [disabled]="isLoading">
+        <button (click)="sendPrompt()" [disabled]="isLoading || !prompt.trim()">
             {{ isLoading ? 'Sending...' : 'Send' }}
         </button>
     </div>
