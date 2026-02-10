@@ -183,10 +183,3 @@ TavilyVectorCache(
    Original query: 'What are the best exercises for building muscle?'
 🤖 [From Cache] Based on the latest research...
 ```
-## 📊 Performance
-
-| Metric | Without Cache | With Cache (Hit) |
-|--------|---------------|------------------|
-| Response Time | 2-5 seconds | <100ms |
-| API Cost | Per query | Zero |
-| Accuracy | Real-time | Cached data |
