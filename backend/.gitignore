@@ -3,3 +3,4 @@ _pycache__
 *.pyc
 *.env
 fresh_env
+chroma_cache
