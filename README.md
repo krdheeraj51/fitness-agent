@@ -1,19 +1,66 @@
-# Fitness Agent 🏋️
+# 🏋️ Fitness Agent
 
-A full-stack AI-powered fitness assistant application built with **Angular** (frontend) and **FastAPI + LangChain** (backend). The agent can answer fitness, nutrition, and health-related questions using web search for up-to-date information.
+An AI-powered fitness assistant that answers questions about fitness, nutrition, and health using LangChain, OpenAI, and Tavily search with intelligent semantic caching.
 
-## Project Structure
+## 🌟 Features
+
+- **AI-Powered Responses**: Uses GPT-5.1 for intelligent fitness advice
+- **Web Search**: Real-time fitness information via Tavily API
+- **Semantic Caching**: ChromaDB vector database caches responses to reduce API calls
+- **Smart Query Matching**: Similar questions return cached results instantly
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      User Query                             │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    Fitness Agent                            │
+│                  (LangChain + GPT-5.1)                      │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  web_fitness_search Tool                    │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│               ChromaDB Semantic Cache                       │
+│          (Query Embeddings + Similarity Search)             │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+              ┌───────────┴───────────┐
+              │                       │
+      Similarity >= 0.85      Similarity < 0.85
+              │                       │
+              ▼                       ▼
+       ┌──────────┐           ┌──────────────┐
+       │  Return  │           │   Tavily     │
+       │  Cached  │           │   API Call   │
+       │ Response │           └──────┬───────┘
+       └──────────┘                  │
+                                     ├──► Store in Cache
+                                     │
+                                     ▼
+                              Return Response
+```
+
+## 📁 Project Structure
 
 ```
 fitness-agent/
-├── backend/                 # Python FastAPI backend
-│   ├── agents-flow/         # LangChain agent logic
-│   │   ├── agent.py         # Agent configuration
-│   │   ├── prompts.py       # System prompts
-│   │   └── tools.py         # Web search tools (Tavily)
-│   ├── main.py              # FastAPI server
-│   ├── requirements.txt     # Python dependencies
-│   └── .env                 # Environment variables (API keys)
+├── backend/
+│   ├── agents-flow/
+│   │   ├── agent.py           # Main agent entry point
+│   │   ├── tools.py           # Tavily search tool with caching
+│   │   ├── prompts.py         # System prompts for the agent
+│   │   ├── query_cache.py     # ChromaDB vector cache implementation
+│   │   └── chroma_cache/      # Persistent cache storage (auto-generated)
+│   └── .env                   # Environment variables
 │
 ├── ui/                      # Angular frontend
 │   ├── src/
@@ -26,57 +73,46 @@ fitness-agent/
 └── README.md
 ```
 
-## Features
+## 🚀 Installation
 
-- 💬 Interactive chat interface for fitness questions
-- 🔍 Web search integration via Tavily API for real-time information
-- 🤖 GPT-powered responses with fitness coach persona
-- ⚡ Real-time streaming responses
-- 🎨 Clean, responsive UI
+### Prerequisites
 
-## Prerequisites
+- Python 3.10+
+- OpenAI API Key
+- Tavily API Key
 
-- **Node.js** (v18+) and npm
-- **Python** (3.10+)
-- **OpenAI API Key**
-- **Tavily API Key**
+### Setup
 
-## Setup
-
-### Backend Setup
-
-1. Navigate to the backend directory:
+1. **Clone the repository**
    ```bash
-   cd backend
+   git clone <repository-url>
+   cd fitness-agent
    ```
 
-2. Create a virtual environment and activate it:
+2. **Create virtual environment**
    ```bash
-   python -m venv .venv
-   # Windows
-   .venv\Scripts\activate
-   # macOS/Linux
-   source .venv/bin/activate
+   python -m venv venv
+   venv\Scripts\activate  # Windows
    ```
 
-3. Install dependencies:
+3. **Install dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-4. Create a `.env` file in the `backend/` directory:
+4. **Configure environment variables**
+   
+   Create `backend/.env` file:
    ```env
    OPENAI_API_KEY=your_openai_api_key
    TAVILY_API_KEY=your_tavily_api_key
    ```
 
-5. Run the FastAPI server:
+5. **Run the FastApi server**
    ```bash
+   cd backend/agents-flow
    fastapi dev main.py
    ```
-   
-   The backend will be available at `http://localhost:8000`
-
 ### Frontend Setup
 
 1. Navigate to the UI directory:
@@ -103,72 +139,54 @@ fitness-agent/
 | GET    | `/`        | Health check                       |
 | POST   | `/agent/`  | Send a prompt to the fitness agent |
 
-### Example Request
+## 💾 Semantic Cache System
+
+### How It Works
+
+The cache uses **ChromaDB** with **sentence-transformers** to create embeddings of user queries. When a new query comes in:
+
+1. **Embedding Generation**: Query is converted to a vector using `all-MiniLM-L6-v2` model
+2. **Similarity Search**: ChromaDB finds the most similar cached query
+3. **Threshold Check**: If similarity ≥ 85%, return cached response
+4. **API Call**: If no match, call Tavily API and store the result
+
+### Cache Benefits
+
+| Benefit | Description |
+|---------|-------------|
+| **Cost Reduction** | Fewer Tavily API calls = lower costs |
+| **Faster Responses** | Cached responses return instantly |
+| **Semantic Matching** | "best exercises for muscle" matches "top workouts for building muscle" |
+| **Persistent Storage** | Cache survives application restarts |
+
+### Cache Configuration
+
+```python
+# In query_cache.py
+TavilyVectorCache(
+    persist_directory="./chroma_cache",  # Storage location
+    similarity_threshold=0.85             # Match threshold (0-1)
+)
+```
+
+
+## 🎯 Usage Examples
 
 ```bash
-curl -X POST http://localhost:8000/agent/ \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "What are the best exercises for building muscle?"}'
+🏋️ Ask your fitness agent: What are the best exercises for building muscle?
+🔍 Calling Tavily API for: 'What are the best exercises for building muscle?'
+💾 Cache STORED for query: 'What are the best exercises for building muscle?'
+🤖 Based on the latest research, the best exercises for building muscle include...
+
+🏋️ Ask your fitness agent: Top workouts for muscle growth
+📦 Cache HIT! Similarity: 0.89
+   Original query: 'What are the best exercises for building muscle?'
+🤖 [From Cache] Based on the latest research...
 ```
+## 📊 Performance
 
-### Example Response
-
-```json
-{
-  "response": "Here are the best exercises for building muscle...",
-  "status": "success"
-}
-```
-
-## Usage
-
-1. Start both the backend and frontend servers
-2. Open `http://localhost:4200` in your browser
-3. Type your fitness-related question in the chat box
-4. Press **Ctrl+Enter** or click **Send** to submit
-5. Receive AI-powered fitness advice!
-
-### Example Questions
-
-- "What are the latest trends in fitness for 2024?"
-- "What are the best exercises for building muscle?"
-- "What are the health benefits of a ketogenic diet?"
-- "How many calories should I eat to lose weight?"
-
-## Tech Stack
-
-### Frontend
-- Angular 21
-- RxJS
-- TypeScript
-
-### Backend
-- FastAPI
-- LangChain
-- OpenAI GPT
-- Tavily Search API
-- Python 3.10+
-
-## Development
-
-### Running Tests
-
-**Frontend:**
-```bash
-cd ui
-npm test
-```
-
-**Backend:**
-```bash
-cd backend
-pytest
-```
-
-### Building for Production
-
-**Frontend:**
-```bash
-cd ui
-npm run build
-```
+| Metric | Without Cache | With Cache (Hit) |
+|--------|---------------|------------------|
+| Response Time | 2-5 seconds | <100ms |
+| API Cost | Per query | Zero |
+| Accuracy | Real-time | Cached data |
